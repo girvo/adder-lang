@@ -23,8 +23,27 @@ class Lexer
         for ($i = 0; $i <= $this->scanner->getLength(); $i++) {
             $char = $this->scanner->scan();
             
+            if ($this->state === 3) {
+                if (preg_match(Token::$match[Token::T_NEWLINE], $char)) {
+                    $this->state = 0;
+                }
+                
+                continue;
+            }
+            
+            // If current char is a # capture until newline and ignore
+            if (preg_match(Token::$match[Token::T_COMMENT], $char)) {
+                if ($this->state === 1) {
+                    $this->flushBuffer();
+                    $this->state = 0;
+                }
+                                
+                $this->state = 3;
+                continue;
+            }
+            
             // If current char is whitespace, stop capture if capturing
-            if (preg_match(Token::$T[0], $char)) {
+            if (preg_match(Token::$match[Token::T_WHITESPACE], $char)) {
                 if ($this->state === 1) {
                     $this->flushBuffer();
                     $this->state = 0;
@@ -34,22 +53,37 @@ class Lexer
             }
             
             // If current char is a number, begin or continue capture
-            if (preg_match(Token::$T[3], $char)) {
+            if (preg_match(Token::$match[Token::T_NUMBER], $char)) {
                 if ($this->state === 0) {
+                    $this->token = Token::T_NUMBER;
                     $this->state = 1;
                 }
                 
-                $this->token = Token::T_NUMBER;
                 $this->buffer .= $char;
+                
+                continue;
             }
             
             // If current char is an operator, stop capture if capturing and capture operator
-            // If current char is a # capture until newline and ignore
-        }
-        
-        // Capture last just in case
-        if ($this->state === 1) {
-            $this->flushBuffer();   
+            if (preg_match(Token::$match[Token::T_OPERATOR], $char)) {
+                if ($this->state === 1) {
+                    $this->flushBuffer();
+                    $this->state = 0;
+                }
+                
+                $this->buffer .= $char;
+                $this->token = Token::T_OPERATOR;
+                $this->flushBuffer();
+                
+                continue;
+            }
+            
+            // If we're on the last character, flush the buffer
+            if ($i === $this->scanner->getLength() && $this->state === 1) {
+                $this->flushBuffer();
+                
+                continue;
+            }
         }
         
         return $this;
@@ -57,7 +91,6 @@ class Lexer
     
     public function flushBuffer()
     {
-        print "Flushing buffer: " . $this->token . ' - ' . $this->buffer . "\n";
         $this->storeToken(
             $this->token,
             $this->buffer
@@ -77,5 +110,10 @@ class Lexer
         ];
         
         return $this;
+    }
+    
+    public function getTokens()
+    {
+        return $this->tokens;
     }
 }

@@ -6,6 +6,7 @@ class Adder
     private $filename;
     private $scanner;
     private $lexer;
+    private $parser;
     
     public function __construct($filename)
     {
@@ -16,8 +17,9 @@ class Adder
     public function run()
     {
         $this->lexer = new Lexer($this->scanner);
+        $this->parser = new Parser($this->lexer);
         
-        $this->lexer->tokenise();
+        print $this->parser->parse();
         
         exit(0);
     }

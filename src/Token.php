@@ -4,20 +4,20 @@ namespace Adder;
 class Token
 {
     const
-        T_WHITESPACE = 0,
-        T_ADD = 1,
-        T_SUBTRACT = 2,
-        T_NUMBER = 3,
-        T_TERM = 4,
-        T_COMMENT = 5;
+        T_WHITESPACE = 'T_WHITESPACE',
+        T_NUMBER = 'T_NUMBER',
+        T_SEMI = 'T_SEMI',
+        T_COMMENT = 'T_COMMENT',
+        T_NEWLINE = 'T_NEWLINE',
+        T_OPERATOR = 'T_OPERATOR';
         
     static
-        $T = [
-            0 => '/[\s]/',
-            1 => '/[+]/',
-            2 => '/[-]/',
-            3 => '/[\d]+/',
-            4 => '/[;]/',
-            5 => '/[#].*\n/'
+        $match = [
+            Token::T_WHITESPACE => '/[\s]/',
+            Token::T_NUMBER => '/[\d]+/',
+            Token::T_SEMI => '/[;]/',
+            Token::T_COMMENT => '/[#]/',
+            Token::T_OPERATOR => '/[\+\-\*\/]/',
+            Token::T_NEWLINE => '/[\n]/'
         ];
 }
